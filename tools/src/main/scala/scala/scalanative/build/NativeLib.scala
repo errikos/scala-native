@@ -34,11 +34,11 @@ private[scalanative] object NativeLib {
   /** Used to find native source files in jar files */
   private val jarSrcRegex: String = {
     val regexExtensions = srcExtensions.mkString("""(\""", """|\""", ")")
-    s"""^${codeDir}${fileSep}(.+)${regexExtensions}$$"""
+    s"""^${codeDir}\\${fileSep}(.+)${regexExtensions}$$"""
   }
 
   private def srcPathPattern(path: Path): String =
-    s"${path.toString()}${fileSep}${codeDir}${fileSep}"
+    s"${path.toString}\\${fileSep}${codeDir}${fileSep}"
 
   /**
    * Used to create hash of the directory to copy
