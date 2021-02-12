@@ -20,4 +20,6 @@ int scalanative_sigsegv() { return SIGSEGV; }
 
 int scalanative_sigterm() { return SIGTERM; }
 
+#if !defined(_WIN32) && !defined(_WIN64)
 int scalanative_sigusr1() { return SIGUSR1; }
+#endif
