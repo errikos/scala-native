@@ -134,7 +134,7 @@ private[scalanative] object LLVM {
     val targetOpt = target(config)
 
     // generate .o files for all included source files in parallel
-    includePaths.par.map { path =>
+    includePaths.map { path =>
       val opath   = path + oExt
       val objPath = Paths.get(opath)
       if (!Files.exists(objPath)) {
@@ -205,7 +205,8 @@ private[scalanative] object LLVM {
       // We need extra linking dependencies for:
       // * libdl for our vendored libunwind implementation.
       // * libpthread for process APIs and parallel garbage collection.
-      "pthread" +: "dl" +: srclinks ++: gclinks
+      srclinks ++: gclinks
+//      "pthread" +: "dl" +: srclinks ++: gclinks
     }
     val linkopts = config.linkingOptions ++ links.map("-l" + _)
     val flags =

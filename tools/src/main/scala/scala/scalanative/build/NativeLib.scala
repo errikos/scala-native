@@ -102,14 +102,15 @@ private[scalanative] object NativeLib {
    * @param workdir the base working directory
    * @return the Seq of NativeLib objects
    */
-  def findNativeLibs(classpath: Seq[Path], workdir: Path): Seq[NativeLib] = {
-    val nativeLibPaths = classpath.flatMap { path =>
-      if (isJar(path)) readJar(path)
-      else readDir(path)
+  def findNativeLibs(classpath: Seq[(Path, String)], workdir: Path): Seq[NativeLib] = {
+    val nativeLibPaths = classpath.flatMap { case (path, module) =>
+      if (isJar(path)) readJar(path).map((_, module))
+      else readDir(path).map((_, module))
     }
 
     val extractPaths =
-      for ((path, index) <- nativeLibPaths.zipWithIndex) yield {
+      for (((path, module), index) <- nativeLibPaths.zipWithIndex
+           if Platform.nativeLibIsSupported(module)) yield {
         val name =
           path
             .getFileName
@@ -163,11 +164,13 @@ private[scalanative] object NativeLib {
    * on the classpath. Linking fails if the entries on the classpath are
    * not either jars or directories.
    *
-   * @param classpath - build tool classpath
+   * @param classpath - build tool classpath zipped with module IDs
    * @return filtered classpath for Scala Native tools
    */
-  def filterClasspath(classpath: Seq[Path]): Seq[Path] =
-    classpath.filter(p => Files.exists(p) && (isJar(p) || Files.isDirectory(p)))
+  def filterClasspath(classpath: Seq[(Path, String)]): Seq[(Path, String)] =
+    classpath.filter{
+      case (p, _) => Files.exists(p) && (isJar(p) || Files.isDirectory(p))
+    }
 
   private val jarPattern = Pattern.compile(jarSrcRegex)
 

@@ -19,6 +19,9 @@ sealed trait Config {
   /** Sequence of all NIR locations. */
   def classPath: Seq[Path]
 
+  /** Sequence of all classPath module IDs. */
+  def modules: Seq[String]
+
   /** The logger used by the toolchain. */
   def logger: Logger
 
@@ -36,6 +39,8 @@ sealed trait Config {
 
   /** Create a new config with given nir paths. */
   def withClassPath(value: Seq[Path]): Config
+
+  def withModules(value: Seq[String]): Config
 
   /** Create a new config with the given logger. */
   def withLogger(value: Logger): Config
@@ -83,6 +88,7 @@ object Config {
       nativelib = Paths.get(""),
       mainClass = "",
       classPath = Seq.empty,
+      modules = Seq.empty,
       workdir = Paths.get(""),
       logger = Logger.default,
       compilerConfig = NativeConfig.empty
@@ -91,6 +97,7 @@ object Config {
   private final case class Impl(nativelib: Path,
                                 mainClass: String,
                                 classPath: Seq[Path],
+                                modules: Seq[String],
                                 workdir: Path,
                                 logger: Logger,
                                 compilerConfig: NativeConfig)
@@ -103,6 +110,9 @@ object Config {
 
     def withClassPath(value: Seq[Path]): Config =
       copy(classPath = value)
+
+    def withModules(value: Seq[String]): Config =
+      copy(modules = value)
 
     def withWorkdir(value: Path): Config =
       copy(workdir = value)

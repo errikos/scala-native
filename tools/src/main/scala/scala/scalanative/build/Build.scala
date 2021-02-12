@@ -52,8 +52,8 @@ object Build {
    */
   def build(config: Config, outpath: Path)(implicit scope: Scope): Path =
     config.logger.time("Total") {
-      val fclasspath = NativeLib.filterClasspath(config.classPath)
-      val fconfig    = config.withClassPath(fclasspath)
+      val (fclasspath, fmodules) = NativeLib.filterClasspath(config.classPath zip config.modules).unzip
+      val fconfig = config.withClassPath(fclasspath).withModules(fmodules)
 
       val workdir = fconfig.workdir
       val entries = ScalaNative.entries(fconfig)
@@ -66,7 +66,7 @@ object Build {
 
       val generated = ScalaNative.codegen(fconfig, optimized)
 
-      val nativelibs   = NativeLib.findNativeLibs(fconfig.classPath, workdir)
+      val nativelibs   = NativeLib.findNativeLibs(fconfig.classPath zip fconfig.modules, workdir)
       val nativelib    = NativeLib.findNativeLib(nativelibs)
       val unpackedLibs = nativelibs.map(LLVM.unpackNativeCode)
 

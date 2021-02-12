@@ -112,14 +112,19 @@ object ScalaNativePluginInternal {
           throw new MessageOnlyException("No main class detected.")
         }
         val classpath = fullClasspath.value.map(_.data.toPath)
-        val maincls   = mainClass + "$"
-        val cwd       = nativeWorkdir.value.toPath
+        val modules   = fullClasspath.value.map { p =>
+          val module = p.metadata(moduleID.key)
+          s"${module.organization}:${module.name}"
+        }
+        val maincls = mainClass + "$"
+        val cwd     = nativeWorkdir.value.toPath
 
         val logger = streams.value.log.toLogger
         build.Config.empty
           .withLogger(logger)
           .withMainClass(maincls)
           .withClassPath(classpath)
+          .withModules(modules)
           .withWorkdir(cwd)
           .withCompilerConfig(nativeConfig.value)
       }

@@ -20,6 +20,27 @@ object Platform {
     }
   }
 
+  final private val SUPPORTED_UNIX_NATIVE_LIBS = Set(
+    "org.scala-native:clib",
+    "org.scala-native:nativelib",
+    "org.scala-native:posixlib",
+  )
+
+  final private val SUPPORTED_WIN_NATIVE_LIBS = Set(
+    "org.scala-native:clib",
+    "org.scala-native:nativelib",
+    "org.scala-native:windowslib",
+  )
+
+  def nativeLibIsSupported(lib: String): Boolean = {
+    OS() match {
+      case Unix() =>
+        SUPPORTED_UNIX_NATIVE_LIBS.contains(lib)
+      case Win() =>
+        SUPPORTED_WIN_NATIVE_LIBS.contains(lib)
+    }
+  }
+
   def which: String = {
     OS() match {
       case Unix() => "which"
