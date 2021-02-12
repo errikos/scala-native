@@ -449,7 +449,12 @@ lazy val windowslib =
     .in(file("windowslib"))
     .enablePlugins(MyScalaNativePlugin)
     .settings(mavenPublishSettings)
-    .dependsOn(nscplugin % "plugin", nativelib)
+    .settings(docsSettings)
+    .settings(
+      libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+      exportJars := true
+    )
+    .dependsOn(nscplugin % "plugin")
 
 lazy val javalibCommonSettings = Def.settings(
   disabledDocsSettings,

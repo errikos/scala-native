@@ -75,7 +75,7 @@ private[scalanative] object NativeLib {
   }
 
   /** To positively identify nativelib */
-  private val nativeLibMarkerFile = "org_scala-native_nativelib.txt"
+  private val nativeLibMarkerFile = Platform.nativeLibMarkerFile
 
   /**
    * Find the marker file in the directory.
@@ -146,7 +146,7 @@ private[scalanative] object NativeLib {
       case Some(nl) => nl.dest
       case None =>
         throw new BuildException(
-          s"Native Library 'nativelib' not found: $nativeLibs")
+          s"Native Library '${Platform.nativeLibName}' not found: $nativeLibs")
     }
   }
 

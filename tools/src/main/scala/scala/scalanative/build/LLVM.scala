@@ -140,7 +140,7 @@ private[scalanative] object LLVM {
       if (!Files.exists(objPath)) {
         val isCpp    = path.endsWith(cppExt)
         val compiler = if (isCpp) config.clangPP.abs else config.clang.abs
-        val stdflag  = if (isCpp) "-std=c++11" else "-std=gnu11"
+        val stdflag  = if (isCpp) "-std=c++14" else "-std=gnu11"
         val flags    = stdflag +: "-fvisibility=hidden" +: config.compileOptions
         val compilec =
           Seq(compiler) ++ fltoOpt ++ flags ++ targetOpt ++

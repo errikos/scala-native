@@ -28,7 +28,6 @@ object Platform {
 
   final private val SUPPORTED_WIN_NATIVE_LIBS = Set(
     "org.scala-native:clib",
-    "org.scala-native:nativelib",
     "org.scala-native:windowslib",
   )
 
@@ -63,6 +62,24 @@ object Platform {
         path
       case Win() =>
         path.replace("\\", "\\\\")
+    }
+  }
+
+  def nativeLibName: String = {
+    OS() match {
+      case Unix() =>
+        "nativelib"
+      case Win() =>
+        "windowslib"
+    }
+  }
+
+  def nativeLibMarkerFile: String = {
+    OS() match {
+      case Unix() =>
+        "org_scala-native_nativelib.txt"
+      case Win() =>
+        "org_scala-native_windowslib.txt"
     }
   }
 
