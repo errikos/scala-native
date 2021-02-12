@@ -121,7 +121,7 @@ private[scalanative] object LLVM {
       }
     }
 
-    val (includePaths, excludePaths) = paths.partition(include(_))
+    val (includePaths, excludePaths) = paths.partition(include)
 
     // delete .o files for all excluded source files
     excludePaths.foreach { path =>
@@ -146,9 +146,7 @@ private[scalanative] object LLVM {
           Seq(compiler) ++ fltoOpt ++ flags ++ targetOpt ++
             Seq("-c", path, "-o", opath)
 
-        config.logger.running(compilec)
-        val result = Process(compilec, config.workdir.toFile) ! Logger
-          .toProcessLogger(config.logger)
+        val result = runLogged(config, compilec)
         if (result != 0) {
           sys.error("Failed to compile native library runtime code.")
         }
@@ -180,9 +178,8 @@ private[scalanative] object LLVM {
       val outpath = apppath + oExt
       val compile =
         Seq(config.clang.abs) ++ fltoOpt ++ Seq("-c", apppath, "-o", outpath) ++ opts
-      config.logger.running(compile)
-      Process(compile, config.workdir.toFile) ! Logger.toProcessLogger(
-        config.logger)
+
+      runLogged(config, compile)
       Paths.get(outpath)
     }.seq
   }
@@ -202,7 +199,6 @@ private[scalanative] object LLVM {
            linkerResult: linker.Result,
            objectsPaths: Seq[Path],
            outpath: Path): Path = {
-    val workdir = config.workdir
     val links = {
       val srclinks = linkerResult.links.map(_.name)
       val gclinks  = config.gc.links
@@ -220,9 +216,7 @@ private[scalanative] object LLVM {
 
     config.logger.time(
       s"Linking native code (${config.gc.name} gc, $ltoName lto)") {
-      config.logger.running(compile)
-      Process(compile, config.workdir.toFile) ! Logger.toProcessLogger(
-        config.logger)
+      runLogged(config, compile)
     }
     outpath
   }
@@ -244,4 +238,10 @@ private[scalanative] object LLVM {
       case Some(tt) => Seq("-target", tt)
       case None     => Seq("-Wno-override-module")
     }
+
+  private def runLogged(config: Config, cmd: Seq[String]): Int = {
+    config.logger.running(cmd)
+    Process(Platform.command(cmd), config.workdir.toFile) ! Logger.toProcessLogger(
+      config.logger)
+  }
 }

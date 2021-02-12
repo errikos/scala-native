@@ -47,9 +47,10 @@ object Discover {
   /** Find default clang compilation options. */
   def compileOptions(): Seq[String] = {
     val includes = {
-      val llvmIncludeDir =
-        Try(Process("llvm-config --includedir").lineStream_!.toSeq)
-          .getOrElse(Seq.empty)
+      val llvmIncludeDir = {
+        val cmd = Platform.command(Seq("llvm-config", "--includedir"))
+        Try(Process(cmd).lineStream_!(silentLogger())).getOrElse(Seq.empty)
+      }
 
       val includeDirs =
         getenv("SCALANATIVE_INCLUDE_DIRS")
@@ -65,9 +66,10 @@ object Discover {
   /** Find default options passed to the system's native linker. */
   def linkingOptions(): Seq[String] = {
     val libs = {
-      val llvmLibDir =
-        Try(Process("llvm-config --libdir").lineStream_!.toSeq)
-          .getOrElse(Seq.empty)
+      val llvmLibDir = {
+        val cmd = Platform.command(Seq("llvm-config", "--libdir"))
+        Try(Process(cmd).lineStream_!(silentLogger())).getOrElse(Seq.empty)
+      }
 
       val libDirs =
         getenv("SCALANATIVE_LIB_DIRS")
@@ -84,7 +86,7 @@ object Discover {
    */
   private[scalanative] def checkClangVersion(pathToClangBinary: Path): Unit = {
     def versionMajorFull(clang: String): (Int, String) = {
-      val versionCommand = s"$clang --version"
+      val versionCommand = Platform.command(Seq(clang, "--version"))
       val versionString = Process(versionCommand)
         .lineStream_!(silentLogger())
         .headOption
@@ -133,8 +135,9 @@ object Discover {
    */
   private[scalanative] def discover(binaryName: String,
                                     envPath: String): Path = {
-    val binaryNameOrPath = sys.env.get(envPath).getOrElse(binaryName)
-    val path = Process(s"which $binaryNameOrPath")
+    val binaryNameOrPath = sys.env.getOrElse(envPath, binaryName)
+    val whichCommand = Platform.command(Seq(Platform.which, binaryNameOrPath))
+    val path = Process(whichCommand)
       .lineStream_!(silentLogger())
       .map { p => Paths.get(p) }
       .headOption

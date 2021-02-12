@@ -28,17 +28,19 @@ private[scalanative] object NativeLib {
   val codeDir = "scala-native"
 
   /** Used to find native source files in directories */
-  private def srcPatterns(path: Path): String =
-    srcExtensions.mkString(s"glob:${srcPathPattern(path)}**{", ",", "}")
+  private def srcPatterns(path: Path): String = {
+    val globifiedPath = Platform.globifyPathStr(srcPathPattern(path))
+    srcExtensions.mkString(s"glob:$globifiedPath**{", ",", "}")
+  }
 
   /** Used to find native source files in jar files */
   private val jarSrcRegex: String = {
     val regexExtensions = srcExtensions.mkString("""(\""", """|\""", ")")
-    s"""^${codeDir}\\${fileSep}(.+)${regexExtensions}$$"""
+    s"""^${codeDir}/(.+)${regexExtensions}$$"""
   }
 
   private def srcPathPattern(path: Path): String =
-    s"${path.toString}\\${fileSep}${codeDir}${fileSep}"
+    s"${path.toString}${fileSep}${codeDir}${fileSep}"
 
   /**
    * Used to create hash of the directory to copy
@@ -46,8 +48,10 @@ private[scalanative] object NativeLib {
    * @param path The classpath entry
    * @return the file pattern
    */
-  def allFilesPattern(path: Path): String =
-    s"glob:${srcPathPattern(path)}**"
+  def allFilesPattern(path: Path): String = {
+    val globifiedPath = Platform.globifyPathStr(srcPathPattern(path))
+    s"glob:$globifiedPath**"
+  }
 
   /**
    * This method guarantees that only code copied and generated
@@ -59,13 +63,13 @@ private[scalanative] object NativeLib {
    * @return the source pattern
    */
   def destSrcPatterns(workdir: Path, nativelibs: Seq[Path]): String = {
-    val pathPat = destPathPattern(workdir, nativelibs)
-    srcExtensions.mkString(s"glob:${pathPat}**{", ",", "}")
+    val globifiedPath = Platform.globifyPathStr(destPathPattern(workdir, nativelibs))
+    srcExtensions.mkString(s"glob:$globifiedPath**{", ",", "}")
   }
 
   private def destPathPattern(workdir: Path, nativelibs: Seq[Path]): String = {
-    val workdirStr = workdir.toString()
-    val nativeDirs = nativelibs.map(_.getFileName().toString())
+    val workdirStr = workdir.toString
+    val nativeDirs = nativelibs.map(_.getFileName.toString())
     val dirPattern = nativeDirs.mkString("{", ",", "}")
     s"${workdirStr}${fileSep}${dirPattern}${fileSep}${codeDir}${fileSep}"
   }
@@ -80,10 +84,10 @@ private[scalanative] object NativeLib {
    * @return the search file pattern
    */
   private def dirMarkerFilePattern(path: Path): String =
-    s"glob:${path.toString()}${fileSep}${nativeLibMarkerFile}"
+    s"glob:${path.toString}${fileSep}${nativeLibMarkerFile}"
 
   /** Does this Path point to a jar file */
-  def isJar(path: Path): Boolean = path.toString().endsWith(jarExtension)
+  def isJar(path: Path): Boolean = path.toString.endsWith(jarExtension)
 
   /** Is this NativeLib in a jar file */
   def isJar(nativelib: NativeLib): Boolean = isJar(nativelib.src)
@@ -108,8 +112,8 @@ private[scalanative] object NativeLib {
       for ((path, index) <- nativeLibPaths.zipWithIndex) yield {
         val name =
           path
-            .getFileName()
-            .toString()
+            .getFileName
+            .toString
             .stripSuffix(jarExtension)
         NativeLib(src = path,
                   dest = workdir.resolve(s"native-code-$name-$index"))

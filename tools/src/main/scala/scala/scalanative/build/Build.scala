@@ -68,7 +68,7 @@ object Build {
 
       val nativelibs   = NativeLib.findNativeLibs(fconfig.classPath, workdir)
       val nativelib    = NativeLib.findNativeLib(nativelibs)
-      val unpackedLibs = nativelibs.map(LLVM.unpackNativeCode(_))
+      val unpackedLibs = nativelibs.map(LLVM.unpackNativeCode)
 
       val objectPaths = config.logger.time("Compiling to native code") {
         val nativelibConfig =
