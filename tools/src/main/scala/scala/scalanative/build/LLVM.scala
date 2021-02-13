@@ -134,6 +134,7 @@ private[scalanative] object LLVM {
     val targetOpt = target(config)
 
     // generate .o files for all included source files in parallel
+    // TODO: restore parallel build
     includePaths.map { path =>
       val opath   = path + oExt
       val objPath = Paths.get(opath)
@@ -243,7 +244,7 @@ private[scalanative] object LLVM {
 
   private def runLogged(config: Config, cmd: Seq[String]): Int = {
     config.logger.running(cmd)
-    Process(Platform.command(cmd), config.workdir.toFile) ! Logger.toProcessLogger(
+    Process(cmd, config.workdir.toFile) ! Logger.toProcessLogger(
       config.logger)
   }
 }

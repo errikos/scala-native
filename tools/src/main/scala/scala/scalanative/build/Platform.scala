@@ -47,15 +47,6 @@ object Platform {
     }
   }
 
-  def command(cmd: Seq[String]): Seq[String] = {
-    OS() match {
-      case Unix() =>
-        cmd
-      case Win() =>
-        Seq("cmd", "/c") ++ cmd
-    }
-  }
-
   def globifyPathStr(path: String): String = {
     OS() match {
       case Unix() =>

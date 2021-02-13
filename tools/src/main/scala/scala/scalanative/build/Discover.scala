@@ -48,7 +48,7 @@ object Discover {
   def compileOptions(): Seq[String] = {
     val includes = {
       val llvmIncludeDir = {
-        val cmd = Platform.command(Seq("llvm-config", "--includedir"))
+        val cmd = Seq("llvm-config", "--includedir")
         Try(Process(cmd).lineStream_!(silentLogger())).getOrElse(Seq.empty)
       }
 
@@ -67,7 +67,7 @@ object Discover {
   def linkingOptions(): Seq[String] = {
     val libs = {
       val llvmLibDir = {
-        val cmd = Platform.command(Seq("llvm-config", "--libdir"))
+        val cmd = Seq("llvm-config", "--libdir")
         Try(Process(cmd).lineStream_!(silentLogger())).getOrElse(Seq.empty)
       }
 
@@ -86,7 +86,7 @@ object Discover {
    */
   private[scalanative] def checkClangVersion(pathToClangBinary: Path): Unit = {
     def versionMajorFull(clang: String): (Int, String) = {
-      val versionCommand = Platform.command(Seq(clang, "--version"))
+      val versionCommand = Seq(clang, "--version")
       val versionString = Process(versionCommand)
         .lineStream_!(silentLogger())
         .headOption
@@ -136,7 +136,7 @@ object Discover {
   private[scalanative] def discover(binaryName: String,
                                     envPath: String): Path = {
     val binaryNameOrPath = sys.env.getOrElse(envPath, binaryName)
-    val whichCommand = Platform.command(Seq(Platform.which, binaryNameOrPath))
+    val whichCommand = Seq(Platform.which, binaryNameOrPath)
     val path = Process(whichCommand)
       .lineStream_!(silentLogger())
       .map { p => Paths.get(p) }
