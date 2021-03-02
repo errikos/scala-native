@@ -74,4 +74,14 @@ object Platform {
     }
   }
 
+  def coreLdFlags: Seq[String] = {
+    OS() match {
+      case Unix() =>
+        Seq("pthread", "dl")
+      case Win() =>
+        // TODO
+        Seq.empty
+    }
+  }
+
 }

@@ -206,9 +206,7 @@ private[scalanative] object LLVM {
       // We need extra linking dependencies for:
       // * libdl for our vendored libunwind implementation.
       // * libpthread for process APIs and parallel garbage collection.
-      // TODO: fix
-      srclinks ++: gclinks
-//      "pthread" +: "dl" +: srclinks ++: gclinks
+      Platform.coreLdFlags ++ srclinks ++ gclinks
     }
     val linkopts = config.linkingOptions ++ links.map("-l" + _)
     val flags =
