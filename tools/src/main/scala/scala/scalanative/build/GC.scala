@@ -29,6 +29,8 @@ object GC {
       extends GC("boehm", Seq("gc"), Seq())
   private[scalanative] final case object Immix
       extends GC("immix", Seq(), Seq("shared", "immix_commix"))
+  private[scalanative] final case object ImmixIsolates
+    extends GC("immix-isolates", Seq(), Seq("shared", "immix_commix"))
   private[scalanative] final case object Commix
       extends GC("commix", Seq(), Seq("shared", "immix_commix"))
   private[scalanative] final case object Experimental
@@ -42,6 +44,9 @@ object GC {
 
   /** Mostly-precise mark-region garbage collector. */
   def immix: GC = Immix
+
+  /** Mostly-precise mark-region garbage collector, adapted for reactive isolates. */
+  def immixIsolates: GC = ImmixIsolates
 
   /** Mostly-precise mark-region garbage collector running concurrently. */
   def commix: GC = Commix
@@ -60,12 +65,14 @@ object GC {
       boehm
     case "immix" =>
       immix
+    case "immix-isolates" =>
+      immixIsolates
     case "commix" =>
       commix
     case "experimental" =>
       experimental
     case value =>
       throw new IllegalArgumentException(
-        "nativeGC can be either \"none\", \"boehm\", \"immix\", \"commix\" or \"experimental\", not: " + value)
+        "nativeGC can be either \"none\", \"boehm\", \"immix\", \"immix-isolates\", \"commix\" or \"experimental\", not: " + value)
   }
 }
