@@ -11,7 +11,6 @@
 #include "Settings.h"
 #include "MemoryInfo.h"
 #include "MemoryMap.h"
-#include <time.h>
 
 void Heap_exitWithOutOfMemory() {
     fprintf(stderr, "Out of heap space\n");

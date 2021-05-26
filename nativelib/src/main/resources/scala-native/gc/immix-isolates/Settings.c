@@ -7,8 +7,6 @@
 #include "Constants.h"
 #include "metadata/BlockMeta.h"
 #include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 
 /*
  Accepts number of bytes or number with a suffix letter for indicating the
@@ -16,11 +14,9 @@
  gigabytes.
 */
 size_t Settings_parseSizeStr(const char *str) {
-    int length = strlen(str);
-    size_t size;
-    sscanf(str, "%zu", &size);
-    char possibleSuffix = str[length - 1];
-    switch (possibleSuffix) {
+    char *suffix = NULL;
+    size_t size = strtoul(str, &suffix, 10);
+    switch (*suffix) {
     case 'k':
     case 'K':
         if (size < (1ULL << (8 * sizeof(size_t) - 10))) {
@@ -44,6 +40,7 @@ size_t Settings_parseSizeStr(const char *str) {
         } else {
             size = UNLIMITED_HEAP_SIZE;
         }
+        break;
     }
     return size;
 }

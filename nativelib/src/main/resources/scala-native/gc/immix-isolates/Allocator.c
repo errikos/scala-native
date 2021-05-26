@@ -1,8 +1,5 @@
-#include <stdlib.h>
 #include "Allocator.h"
-#include "Block.h"
 #include <stdio.h>
-#include <memory.h>
 
 bool Allocator_getNextLine(Allocator *allocator);
 bool Allocator_newBlock(Allocator *allocator);

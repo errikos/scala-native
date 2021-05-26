@@ -1,5 +1,5 @@
-#ifndef IMMIX_BLOCLIST_H
-#define IMMIX_BLOCLIST_H
+#ifndef IMMIX_BLOCKLIST_H
+#define IMMIX_BLOCKLIST_H
 
 #include "../metadata/BlockMeta.h"
 
@@ -18,4 +18,4 @@ void BlockList_AddLast(BlockList *blockList, BlockMeta *block);
 void BlockList_AddBlocksLast(BlockList *blockList, BlockMeta *first,
                              BlockMeta *last);
 
-#endif // IMMIX_BLOCLIST_H
+#endif // IMMIX_BLOCKLIST_H

@@ -18,7 +18,7 @@ typedef struct {
 
 void Bytemap_Init(Bytemap *bytemap, word_t *firstAddress, size_t size);
 
-static inline size_t Bytemap_index(Bytemap *bytemap, word_t *address) {
+static inline size_t Bytemap_index(Bytemap *bytemap, const word_t *address) {
     size_t index =
         (address - bytemap->firstAddress) / ALLOCATION_ALIGNMENT_WORDS;
     assert(address >= bytemap->firstAddress);
@@ -28,7 +28,7 @@ static inline size_t Bytemap_index(Bytemap *bytemap, word_t *address) {
     return index;
 }
 
-static inline ObjectMeta *Bytemap_Get(Bytemap *bytemap, word_t *address) {
+static inline ObjectMeta *Bytemap_Get(Bytemap *bytemap, const word_t *address) {
     size_t index =
         (address - bytemap->firstAddress) / ALLOCATION_ALIGNMENT_WORDS;
     assert(address >= bytemap->firstAddress);

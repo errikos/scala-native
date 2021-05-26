@@ -1,11 +1,9 @@
-#include <stdio.h>
 #include <memory.h>
 #include "Block.h"
 #include "Object.h"
 #include "metadata/ObjectMeta.h"
 #include "Log.h"
 #include "Allocator.h"
-#include "Marker.h"
 
 INLINE void Block_recycleUnmarkedBlock(Allocator *allocator,
                                        BlockMeta *blockMeta,

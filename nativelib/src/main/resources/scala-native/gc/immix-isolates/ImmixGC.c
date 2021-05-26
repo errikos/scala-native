@@ -1,18 +1,11 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include <memory.h>
 #include "GCTypes.h"
 #include "Heap.h"
 #include "datastructures/Stack.h"
-#include "Marker.h"
-#include "Log.h"
-#include "Object.h"
 #include "State.h"
 #include "utils/MathUtils.h"
 #include "Constants.h"
 #include "Settings.h"
-
-void scalanative_collect();
 
 void scalanative_afterexit() { Stats_OnExit(heap.stats); }
 

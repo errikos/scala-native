@@ -1,9 +1,6 @@
 #include <stddef.h>
-#include <stdio.h>
 #include "Object.h"
-#include "Block.h"
 #include "Log.h"
-#include "utils/MathUtils.h"
 
 word_t *Object_LastWord(Object *object) {
     size_t size = Object_Size(object);

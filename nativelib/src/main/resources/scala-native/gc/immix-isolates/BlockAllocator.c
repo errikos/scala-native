@@ -1,7 +1,6 @@
 #include "BlockAllocator.h"
 #include "Log.h"
 #include "utils/MathUtils.h"
-#include <stdio.h>
 
 void BlockAllocator_addFreeBlocksInternal(BlockAllocator *blockAllocator,
                                           BlockMeta *block, uint32_t count);
