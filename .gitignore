@@ -10,8 +10,9 @@ scripts/.scalafmt*
 sbt-crossproject/
 local.sbt
 
-CMakeLists.txt
+# CLion
 cmake-build-debug/
+cmake-build-release/
 
 # Eclipse / Scala IDE
 bin/
