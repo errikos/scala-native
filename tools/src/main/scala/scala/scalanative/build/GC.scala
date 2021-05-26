@@ -52,7 +52,7 @@ object GC {
   def commix: GC = Commix
 
   /** The default garbage collector. */
-  def default: GC = Immix
+  def default: GC = ImmixIsolates
 
   /** Placeholder for a user defined experimental garbage collector. */
   def experimental: GC = Experimental
