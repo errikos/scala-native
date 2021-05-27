@@ -46,7 +46,10 @@ private[scalanative] object Filter {
           val name = Paths.get(path).toFile.getName.split("\\.").head
           linkerResult.links.map(_.name).contains(name)
         } else if (path.contains(gcPath)) {
-          gcSelectedPaths.exists(path.contains)
+          gcSelectedPaths.find(path.contains).fold(false) { gcPath =>
+            // exclude any "test" top-level directory from the selected GC paths
+            !Paths.get(gcPath).relativize(Paths.get(path)).startsWith("test")
+          }
         } else {
           true
         }
