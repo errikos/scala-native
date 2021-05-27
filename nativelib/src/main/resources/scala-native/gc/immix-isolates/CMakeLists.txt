@@ -37,17 +37,17 @@ target_include_directories(immix-isolates
         PRIVATE ../immix_commix)
 
 add_executable(immix-isolates-test
-        munit/munit.c
-        munit/munit.h
-        munit/main.c
-        munit/tests/test-settings.c
-        munit/tests/test-sample.c)
+        test/munit/munit.c
+        test/munit/munit.h
+        test/main.c
+        test/tests/test-sample.c
+        test/tests/test-settings.c)
 
 target_link_libraries(immix-isolates-test
         immix-isolates)
 
 target_include_directories(immix-isolates-test
-        PRIVATE munit
+        PRIVATE test/munit
         PRIVATE .
         PRIVATE ../immix_commix)
 
