@@ -31,7 +31,7 @@ add_library(immix-isolates
         State.c
         State.h
         Stats.c
-        Stats.h)
+        Stats.h datastructures/BinaryTree.h datastructures/BinaryTree.c)
 
 target_include_directories(immix-isolates
         PRIVATE ../immix_commix)
@@ -41,7 +41,8 @@ add_executable(immix-isolates-test
         test/munit/munit.h
         test/main.c
         test/tests/test-sample.c
-        test/tests/test-settings.c)
+        test/tests/test-settings.c
+        test/tests/test-btree.c)
 
 target_link_libraries(immix-isolates-test
         immix-isolates)
