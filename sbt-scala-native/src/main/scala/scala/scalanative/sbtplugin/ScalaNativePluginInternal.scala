@@ -46,6 +46,7 @@ object ScalaNativePluginInternal {
     nativeLinkingOptions := nativeConfig.value.linkingOptions,
     nativeMode := nativeConfig.value.mode.name,
     nativeGC := nativeConfig.value.gc.name,
+    nativeIsolates := nativeConfig.value.isolates,
     nativeLTO := nativeConfig.value.lto.name,
     nativeLinkStubs := nativeConfig.value.linkStubs,
     nativeCheck := nativeConfig.value.check,
@@ -102,6 +103,7 @@ object ScalaNativePluginInternal {
         .withCompileOptions(nativeCompileOptions.value)
         .withLinkingOptions(nativeLinkingOptions.value)
         .withGC(build.GC(nativeGC.value))
+        .withIsolates(nativeIsolates.value)
         .withMode(build.Mode(nativeMode.value))
         .withLTO(build.LTO(nativeLTO.value))
         .withLinkStubs(nativeLinkStubs.value)

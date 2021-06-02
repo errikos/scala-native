@@ -47,6 +47,9 @@ sealed trait Config {
   /** The garbage collector to use. */
   def gc: GC = compilerConfig.gc
 
+  /** Whether to enable reactive isolates (experimental). */
+  def isolates: Boolean = compilerConfig.isolates
+
   /** Compilation mode. */
   def mode: Mode = compilerConfig.mode
 

@@ -48,7 +48,7 @@ private[scalanative] object LLVM {
             else Seq("-std=c++11")
           } else Seq("-std=gnu11")
         }
-        val flags = opt(config) +: stdflag ++: "-fvisibility=hidden" +:
+        val flags = isolates(config) ++: opt(config) +: stdflag ++: "-fvisibility=hidden" +:
           config.compileOptions
         val compilec =
           Seq(compiler) ++ flto(config) ++ flags ++ target(config) ++
@@ -136,4 +136,11 @@ private[scalanative] object LLVM {
       case Mode.ReleaseFast => "-O2"
       case Mode.ReleaseFull => "-O3"
     }
+
+  private def isolates(config: Config): Option[String] = {
+    if (config.isolates)
+      Some("-DREACTIVE_ISOLATES")
+    else
+      None
+  }
 }

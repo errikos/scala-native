@@ -9,6 +9,9 @@ sealed trait NativeConfig {
   /** The garbage collector to use. */
   def gc: GC
 
+  /** Whether to enable reactive isolates (experimental). */
+  def isolates: Boolean
+
   /** Compilation mode. */
   def mode: Mode
 
@@ -47,6 +50,9 @@ sealed trait NativeConfig {
 
   /** Create a new config with given garbage collector. */
   def withGC(value: GC): NativeConfig
+
+  /** Create a new config with given native isolates flag. */
+  def withIsolates(value: Boolean): NativeConfig
 
   /** Create a new config with given compilation mode. */
   def withMode(value: Mode): NativeConfig
@@ -99,6 +105,7 @@ object NativeConfig {
       compileOptions = Seq.empty,
       targetTriple = None,
       gc = GC.default,
+      isolates = false,
       lto = LTO.default,
       mode = Mode.default,
       check = false,
@@ -114,6 +121,7 @@ object NativeConfig {
                                 compileOptions: Seq[String],
                                 targetTriple: Option[String],
                                 gc: GC,
+                                isolates: Boolean,
                                 mode: Mode,
                                 lto: LTO,
                                 linkStubs: Boolean,
@@ -144,6 +152,9 @@ object NativeConfig {
 
     def withGC(value: GC): NativeConfig =
       copy(gc = value)
+
+    def withIsolates(value: Boolean): NativeConfig =
+      copy(isolates = value)
 
     def withMode(value: Mode): NativeConfig =
       copy(mode = value)

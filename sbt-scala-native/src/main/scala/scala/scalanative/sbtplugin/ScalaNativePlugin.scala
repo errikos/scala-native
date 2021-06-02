@@ -44,6 +44,9 @@ object ScalaNativePlugin extends AutoPlugin {
       taskKey[String](
         "GC choice, either \"none\", \"boehm\", \"immix\" or \"commix\".")
 
+    val nativeIsolates =
+      taskKey[Boolean]("Enable native reactive isolates (experimental)")
+
     val nativeLTO =
       taskKey[String](
         "LTO variant used for release mode (either \"none\", \"thin\" or \"full\").")

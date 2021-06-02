@@ -723,6 +723,7 @@ lazy val sandbox =
     .enablePlugins(MyScalaNativePlugin)
     .settings(scalacOptions -= "-Xfatal-warnings")
     .settings(nativeGC := "immix-isolates")
+    .settings(nativeIsolates := true)
     .settings(noPublishSettings)
     .dependsOn(nscplugin % "plugin", allCoreLibs, testInterface % Test)
 
