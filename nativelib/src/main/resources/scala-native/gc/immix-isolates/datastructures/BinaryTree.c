@@ -2,7 +2,7 @@
 #include "BinaryTree.h"
 
 typedef struct {
-    pid_t pid;
+    pthread_t pid;
     size_t pos;
 } data_t;
 
@@ -19,7 +19,7 @@ void btree_init(btree_t *btree) {
     btree->size = 0u;
 }
 
-void btree_insert(btree_t *btree, pid_t pid, size_t pos) {
+void btree_insert(btree_t *btree, pthread_t pid, size_t pos) {
     btree_node_t **it = &btree->root;
 
     while (*it) {
@@ -46,7 +46,7 @@ size_t btree_height(const btree_t *btree) {
     return btree_height_rec(btree->root) - 1;
 }
 
-int btree_search(const btree_t *btree, pid_t key, size_t *value) {
+int btree_search(const btree_t *btree, pthread_t key, size_t *value) {
     btree_node_t *p = btree->root;
 
     while (p) {

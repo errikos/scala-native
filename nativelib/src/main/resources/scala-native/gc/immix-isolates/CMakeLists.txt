@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.19)
 
+add_compile_options(-DREACTIVE_ISOLATES)
+
 add_library(immix-isolates
+        datastructures/BinaryTree.c
+        datastructures/BinaryTree.h
         datastructures/BlockList.c
         datastructures/BlockList.h
         datastructures/Bytemap.c
@@ -31,7 +35,7 @@ add_library(immix-isolates
         State.c
         State.h
         Stats.c
-        Stats.h datastructures/BinaryTree.h datastructures/BinaryTree.c)
+        Stats.h)
 
 target_include_directories(immix-isolates
         PRIVATE ../immix_commix)
@@ -42,7 +46,8 @@ add_executable(immix-isolates-test
         test/main.c
         test/tests/test-sample.c
         test/tests/test-settings.c
-        test/tests/test-btree.c)
+        test/tests/test-btree.c
+        test/tests/test-gc)
 
 target_link_libraries(immix-isolates-test
         immix-isolates)

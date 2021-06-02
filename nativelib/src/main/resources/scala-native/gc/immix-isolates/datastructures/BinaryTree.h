@@ -12,8 +12,8 @@ typedef struct {
 } btree_t;
 
 void btree_init(btree_t *btree);
-void btree_insert(btree_t *btree, pid_t pid, size_t pos);
+void btree_insert(btree_t *btree, pthread_t pid, size_t pos);
 size_t btree_height(const btree_t *btree);
-int btree_search(const btree_t *btree, pid_t key, size_t *value);
+int btree_search(const btree_t *btree, pthread_t key, size_t *value);
 
 #endif // SCALA_NATIVE_BINARYTREE_H

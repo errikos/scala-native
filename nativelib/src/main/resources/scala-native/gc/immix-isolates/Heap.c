@@ -51,6 +51,7 @@ word_t *Heap_mapAndAlign(size_t memoryLimit, size_t alignmentSize) {
  * Allocates the heap struct and initializes it
  */
 void Heap_Init(Heap *heap, size_t minHeapSize, size_t maxHeapSize) {
+    GC_state_t *state = get_state();
     size_t memoryLimit = Heap_getMemoryLimit();
 
     if (maxHeapSize < MIN_HEAP_SIZE) {
@@ -110,7 +111,7 @@ void Heap_Init(Heap *heap, size_t minHeapSize, size_t maxHeapSize) {
 
     word_t *heapStart = Heap_mapAndAlign(maxHeapSize, BLOCK_TOTAL_SIZE);
 
-    BlockAllocator_Init(&blockAllocator, blockMetaStart, initialBlockCount);
+    BlockAllocator_Init(&state->blockAllocator, blockMetaStart, initialBlockCount);
 
     // reserve space for bytemap
     Bytemap *bytemap = (Bytemap *)Heap_mapAndAlign(
@@ -123,10 +124,10 @@ void Heap_Init(Heap *heap, size_t minHeapSize, size_t maxHeapSize) {
     heap->heapStart = heapStart;
     heap->heapEnd = heapStart + minHeapSize / WORD_SIZE;
     Bytemap_Init(bytemap, heapStart, maxHeapSize);
-    Allocator_Init(&allocator, &blockAllocator, bytemap, blockMetaStart,
+    Allocator_Init(&state->allocator, &state->blockAllocator, bytemap, blockMetaStart,
                    heapStart);
 
-    LargeAllocator_Init(&largeAllocator, &blockAllocator, bytemap,
+    LargeAllocator_Init(&state->largeAllocator, &state->blockAllocator, bytemap,
                         blockMetaStart, heapStart);
     char *statsFile = Settings_StatsFileName();
     if (statsFile != NULL) {
@@ -140,22 +141,23 @@ void Heap_Init(Heap *heap, size_t minHeapSize, size_t maxHeapSize) {
  * trigger a collection of both the small and the large heap.
  */
 word_t *Heap_AllocLarge(Heap *heap, uint32_t size) {
+    GC_state_t *state = get_state();
 
     assert(size % ALLOCATION_ALIGNMENT == 0);
     assert(size >= MIN_BLOCK_SIZE);
 
     // Request an object from the `LargeAllocator`
-    Object *object = LargeAllocator_GetBlock(&largeAllocator, size);
+    Object *object = LargeAllocator_GetBlock(&state->largeAllocator, size);
     // If the object is not NULL, update it's metadata and return it
     if (object != NULL) {
         return (word_t *)object;
     } else {
         // Otherwise collect
-        Heap_Collect(heap, &stack);
+        Heap_Collect(heap, &state->stack);
 
         // After collection, try to alloc again, if it fails, grow the heap by
         // at least the size of the object we want to alloc
-        object = LargeAllocator_GetBlock(&largeAllocator, size);
+        object = LargeAllocator_GetBlock(&state->largeAllocator, size);
         if (object != NULL) {
             assert(Heap_IsWordInHeap(heap, (word_t *)object));
             return (word_t *)object;
@@ -164,7 +166,7 @@ word_t *Heap_AllocLarge(Heap *heap, uint32_t size) {
             uint32_t pow2increment = 1ULL << MathUtils_Log2Ceil(increment);
             Heap_Grow(heap, pow2increment);
 
-            object = LargeAllocator_GetBlock(&largeAllocator, size);
+            object = LargeAllocator_GetBlock(&state->largeAllocator, size);
             assert(object != NULL);
             assert(Heap_IsWordInHeap(heap, (word_t *)object));
             return (word_t *)object;
@@ -173,14 +175,16 @@ word_t *Heap_AllocLarge(Heap *heap, uint32_t size) {
 }
 
 NOINLINE word_t *Heap_allocSmallSlow(Heap *heap, uint32_t size) {
+    GC_state_t *state = get_state();
+
     Object *object;
-    object = (Object *)Allocator_Alloc(&allocator, size);
+    object = (Object *)Allocator_Alloc(&state->allocator, size);
 
     if (object != NULL)
         goto done;
 
-    Heap_Collect(heap, &stack);
-    object = (Object *)Allocator_Alloc(&allocator, size);
+    Heap_Collect(heap, &state->stack);
+    object = (Object *)Allocator_Alloc(&state->allocator, size);
 
     if (object != NULL)
         goto done;
@@ -188,34 +192,36 @@ NOINLINE word_t *Heap_allocSmallSlow(Heap *heap, uint32_t size) {
     // A small object can always fit in a single free block
     // because it is no larger than 8K while the block is 32K.
     Heap_Grow(heap, 1);
-    object = (Object *)Allocator_Alloc(&allocator, size);
+    object = (Object *)Allocator_Alloc(&state->allocator, size);
 
 done:
     assert(Heap_IsWordInHeap(heap, (word_t *)object));
     assert(object != NULL);
-    ObjectMeta *objectMeta = Bytemap_Get(allocator.bytemap, (word_t *)object);
+    ObjectMeta *objectMeta = Bytemap_Get(state->allocator.bytemap, (word_t *)object);
     ObjectMeta_SetAllocated(objectMeta);
     return (word_t *)object;
 }
 
 INLINE word_t *Heap_AllocSmall(Heap *heap, uint32_t size) {
+    GC_state_t *state = get_state();
+
     assert(size % ALLOCATION_ALIGNMENT == 0);
     assert(size < MIN_BLOCK_SIZE);
 
-    word_t *start = allocator.cursor;
+    word_t *start = state->allocator.cursor;
     word_t *end = (word_t *)((uint8_t *)start + size);
 
     // Checks if the end of the block overlaps with the limit
-    if (end >= allocator.limit) {
+    if (end >= state->allocator.limit) {
         return Heap_allocSmallSlow(heap, size);
     }
 
-    allocator.cursor = end;
+    state->allocator.cursor = end;
 
     memset(start, 0, size);
 
     Object *object = (Object *)start;
-    ObjectMeta *objectMeta = Bytemap_Get(allocator.bytemap, (word_t *)object);
+    ObjectMeta *objectMeta = Bytemap_Get(state->allocator.bytemap, (word_t *)object);
     ObjectMeta_SetAllocated(objectMeta);
 
     __builtin_prefetch(object + 36, 0, 3);
@@ -260,9 +266,11 @@ void Heap_Collect(Heap *heap, Stack *stack) {
 }
 
 bool Heap_shouldGrow(Heap *heap) {
-    uint32_t freeBlockCount = blockAllocator.freeBlockCount;
+    GC_state_t *state = get_state();
+
+    uint32_t freeBlockCount = state->blockAllocator.freeBlockCount;
     uint32_t blockCount = heap->blockCount;
-    uint32_t recycledBlockCount = allocator.recycledBlockCount;
+    uint32_t recycledBlockCount = state->allocator.recycledBlockCount;
     uint32_t unavailableBlockCount =
         blockCount - (freeBlockCount + recycledBlockCount);
 
@@ -279,9 +287,11 @@ bool Heap_shouldGrow(Heap *heap) {
 }
 
 void Heap_Recycle(Heap *heap) {
-    Allocator_Clear(&allocator);
-    LargeAllocator_Clear(&largeAllocator);
-    BlockAllocator_Clear(&blockAllocator);
+    GC_state_t *state = get_state();
+
+    Allocator_Clear(&state->allocator);
+    LargeAllocator_Clear(&state->largeAllocator);
+    BlockAllocator_Clear(&state->blockAllocator);
 
     BlockMeta *current = (BlockMeta *)heap->blockMetaStart;
     word_t *currentBlockStart = heap->heapStart;
@@ -291,13 +301,13 @@ void Heap_Recycle(Heap *heap) {
         int size = 1;
         assert(!BlockMeta_IsSuperblockMiddle(current));
         if (BlockMeta_IsSimpleBlock(current)) {
-            Block_Recycle(&allocator, current, currentBlockStart, lineMetas);
+            Block_Recycle(&state->allocator, current, currentBlockStart, lineMetas);
         } else if (BlockMeta_IsSuperblockStart(current)) {
             size = BlockMeta_SuperblockSize(current);
-            LargeAllocator_Sweep(&largeAllocator, current, currentBlockStart);
+            LargeAllocator_Sweep(&state->largeAllocator, current, currentBlockStart);
         } else {
             assert(BlockMeta_IsFree(current));
-            BlockAllocator_AddFreeBlocks(&blockAllocator, current, 1);
+            BlockAllocator_AddFreeBlocks(&state->blockAllocator, current, 1);
         }
         assert(size > 0);
         current += size;
@@ -322,17 +332,19 @@ void Heap_Recycle(Heap *heap) {
             }
         }
     }
-    BlockAllocator_SweepDone(&blockAllocator);
-    if (!Allocator_CanInitCursors(&allocator)) {
+    BlockAllocator_SweepDone(&state->blockAllocator);
+    if (!Allocator_CanInitCursors(&state->allocator)) {
         Heap_exitWithOutOfMemory();
     }
-    Allocator_InitCursors(&allocator);
+    Allocator_InitCursors(&state->allocator);
 }
 
 void Heap_Grow(Heap *heap, uint32_t incrementInBlocks) {
     if (!Heap_isGrowingPossible(heap, incrementInBlocks)) {
         Heap_exitWithOutOfMemory();
     }
+
+    GC_state_t *state = get_state();
 
 #ifdef DEBUG_PRINT
     printf("Growing small heap by %zu bytes, to %zu bytes\n",
@@ -350,11 +362,11 @@ void Heap_Grow(Heap *heap, uint32_t incrementInBlocks) {
     heap->lineMetaEnd +=
         incrementInBlocks * LINE_COUNT * LINE_METADATA_SIZE / WORD_SIZE;
 
-    BlockAllocator_AddFreeBlocks(&blockAllocator, (BlockMeta *)blockMetaEnd,
+    BlockAllocator_AddFreeBlocks(&state->blockAllocator, (BlockMeta *)blockMetaEnd,
                                  incrementInBlocks);
 
     heap->blockCount += incrementInBlocks;
 
     // immediately add the block to freelists
-    BlockAllocator_SweepDone(&blockAllocator);
+    BlockAllocator_SweepDone(&state->blockAllocator);
 }
