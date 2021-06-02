@@ -50,12 +50,12 @@ int btree_search(const btree_t *btree, pid_t key, size_t *value) {
     btree_node_t *p = btree->root;
 
     while (p) {
-        if (key == p->data.pid)
-            break;
+        if (key == p->data.pid) {
+            *value = p->data.pos;
+            return 0;
+        }
         p = (key < p->data.pid) ? p->left : p->right;
     }
 
-    *value = (p ? p->data.pos : ~0);
-
-    return p ? 0 : 1;
+    return 1;
 }
