@@ -1,0 +1,6 @@
+#ifndef SCALA_NATIVE_ISOLATELAYER_H
+#define SCALA_NATIVE_ISOLATELAYER_H
+
+pthread_t new_isolate();
+
+#endif // SCALA_NATIVE_ISOLATELAYER_H

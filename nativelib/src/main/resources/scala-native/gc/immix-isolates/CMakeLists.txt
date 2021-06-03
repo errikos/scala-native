@@ -35,7 +35,7 @@ add_library(immix-isolates
         State.c
         State.h
         Stats.c
-        Stats.h)
+        Stats.h ImmixGC.h)
 
 target_include_directories(immix-isolates
         PRIVATE ../immix_commix)

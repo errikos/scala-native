@@ -33,6 +33,7 @@ private[scalanative] object Filter {
       // we only include sources of the current gc and exclude
       // all optional dependencies if they are not necessary
       val optPath = nativeCodePath.resolve("optional").abs
+      val isoPath = nativeCodePath.resolve("isolates").abs
       val (gcPath, gcIncludePaths, gcSelectedPaths) = {
         val gcPath         = nativeCodePath.resolve("gc")
         val gcIncludePaths = config.gc.include.map(gcPath.resolve(_).abs)
@@ -50,6 +51,8 @@ private[scalanative] object Filter {
             // exclude any "test" top-level directory from the selected GC paths
             !Paths.get(gcPath).relativize(Paths.get(path)).startsWith("test")
           }
+        } else if (path.contains(isoPath)) {
+          !Paths.get(isoPath).relativize(Paths.get(path)).startsWith("test")
         } else {
           true
         }

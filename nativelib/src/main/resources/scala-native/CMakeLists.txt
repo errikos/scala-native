@@ -5,3 +5,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
 
 add_subdirectory(gc)
+add_subdirectory(isolates)
+
+add_dependencies(isolates
+        immix-isolates)

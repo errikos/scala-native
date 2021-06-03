@@ -1,4 +1,4 @@
-package isolates
+package scala.scalanative.isolates
 
 trait Isolate {
 
