@@ -12,6 +12,12 @@ extern Allocator allocator;
 extern LargeAllocator largeAllocator;
 extern BlockAllocator blockAllocator;
 
+#define HEAP() (heap)
+#define STACK() (stack)
+#define ALLOCATOR() (allocator)
+#define LARGE_ALLOCATOR() (largeAllocator)
+#define BLOCK_ALLOCATOR() (blockAllocator)
+
 #else
 
 #ifndef MAXNUM_ISOLATES
@@ -32,6 +38,12 @@ extern btree_t state_index;
 extern size_t next_avail_state_idx;
 
 GC_state_t *get_state();
+
+#define HEAP() (get_state()->heap)
+#define STACK() (get_state()->stack)
+#define ALLOCATOR() (get_state()->allocator)
+#define LARGE_ALLOCATOR() (get_state()->largeAllocator)
+#define BLOCK_ALLOCATOR() (get_state()->blockAllocator)
 
 #endif
 

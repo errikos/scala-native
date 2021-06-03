@@ -2,6 +2,8 @@
 #include "State.h"
 #include "munit.h"
 
+#ifdef REACTIVE_ISOLATES
+
 void *gc_state_setup(const MunitParameter params[], void *user_data) {
     /* zero-out isolate GC states array */
     memset(isolate_states, 0, MAXNUM_ISOLATES * sizeof(GC_state_t));
@@ -42,7 +44,10 @@ MunitResult gc_init_state_test(const MunitParameter params[],
     return MUNIT_OK;
 }
 
+#endif
+
 static MunitTest gcTests[] = {
+#ifdef REACTIVE_ISOLATES
     {
         "/gc-initial-state-test",             /* name */
         gc_initial_state_test,  /* test */
@@ -59,6 +64,7 @@ static MunitTest gcTests[] = {
         MUNIT_TEST_OPTION_NONE, /* options */
         NULL                    /* parameters */
     },
+#endif
     /* Mark the end of the array with an entry where the test
      * function is NULL */
     {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL}};

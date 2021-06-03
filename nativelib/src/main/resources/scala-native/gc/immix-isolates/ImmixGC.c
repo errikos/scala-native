@@ -9,15 +9,25 @@
 #include "Settings.h"
 
 void scalanative_afterexit() {
-    Stats_OnExit(get_state()->heap.stats);
+    Stats_OnExit(HEAP().stats);
 }
+
+#ifndef REACTIVE_ISOLATES
+
+NOINLINE void scalanative_init() {
+    Heap_Init(&HEAP(), Settings_MinHeapSize(), Settings_MaxHeapSize());
+    Stack_Init(&STACK(), INITIAL_STACK_SIZE);
+    atexit(scalanative_afterexit);
+}
+
+#else
 
 /* This function is called once per thread. */
 NOINLINE void scalanative_thread_init() {
     btree_insert(&state_index, pthread_self(), next_avail_state_idx++);
 
-    Heap_Init(&get_state()->heap, Settings_MinHeapSize(), Settings_MaxHeapSize());
-    Stack_Init(&get_state()->stack, INITIAL_STACK_SIZE);
+    Heap_Init(&HEAP(), Settings_MinHeapSize(), Settings_MaxHeapSize());
+    Stack_Init(&STACK(), INITIAL_STACK_SIZE);
 
     atexit(scalanative_afterexit);
 }
@@ -34,10 +44,12 @@ NOINLINE void scalanative_init() {
     scalanative_thread_init();
 }
 
+#endif
+
 INLINE void *scalanative_alloc(void *info, size_t size) {
     size = MathUtils_RoundToNextMultiple(size, ALLOCATION_ALIGNMENT);
 
-    void **alloc = (void **)Heap_Alloc(&get_state()->heap, size);
+    void **alloc = (void **)Heap_Alloc(&HEAP(), size);
     *alloc = info;
     return (void *)alloc;
 }
@@ -45,7 +57,7 @@ INLINE void *scalanative_alloc(void *info, size_t size) {
 INLINE void *scalanative_alloc_small(void *info, size_t size) {
     size = MathUtils_RoundToNextMultiple(size, ALLOCATION_ALIGNMENT);
 
-    void **alloc = (void **)Heap_AllocSmall(&get_state()->heap, size);
+    void **alloc = (void **)Heap_AllocSmall(&HEAP(), size);
     *alloc = info;
     return (void *)alloc;
 }
@@ -53,7 +65,7 @@ INLINE void *scalanative_alloc_small(void *info, size_t size) {
 INLINE void *scalanative_alloc_large(void *info, size_t size) {
     size = MathUtils_RoundToNextMultiple(size, ALLOCATION_ALIGNMENT);
 
-    void **alloc = (void **)Heap_AllocLarge(&get_state()->heap, size);
+    void **alloc = (void **)Heap_AllocLarge(&HEAP(), size);
     *alloc = info;
     return (void *)alloc;
 }
@@ -62,4 +74,4 @@ INLINE void *scalanative_alloc_atomic(void *info, size_t size) {
     return scalanative_alloc(info, size);
 }
 
-INLINE void scalanative_collect() { Heap_Collect(&get_state()->heap, &get_state()->stack); }
+INLINE void scalanative_collect() { Heap_Collect(&HEAP(), &STACK()); }

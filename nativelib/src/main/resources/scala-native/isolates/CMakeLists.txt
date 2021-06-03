@@ -2,10 +2,8 @@ cmake_minimum_required(VERSION 3.19)
 
 add_library(isolates
         IsolateLayer.c
-        IsolateLayer.h)
-
-target_include_directories(isolates
-        PRIVATE ../gc/immix-isolates)
+        IsolateLayer.h
+        )
 
 add_executable(isolates-test
         test/munit/munit.c

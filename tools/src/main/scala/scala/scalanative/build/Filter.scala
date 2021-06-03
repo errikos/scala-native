@@ -52,7 +52,7 @@ private[scalanative] object Filter {
             !Paths.get(gcPath).relativize(Paths.get(path)).startsWith("test")
           }
         } else if (path.contains(isoPath)) {
-          !Paths.get(isoPath).relativize(Paths.get(path)).startsWith("test")
+          config.isolates && !Paths.get(isoPath).relativize(Paths.get(path)).startsWith("test")
         } else {
           true
         }

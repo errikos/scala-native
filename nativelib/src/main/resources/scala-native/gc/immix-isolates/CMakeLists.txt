@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.19)
 
-add_compile_options(-DREACTIVE_ISOLATES)
-
 add_library(immix-isolates
         datastructures/BinaryTree.c
         datastructures/BinaryTree.h
@@ -24,6 +22,7 @@ add_library(immix-isolates
         Heap.c
         Heap.h
         ImmixGC.c
+        ImmixGC.h
         LargeAllocator.c
         LargeAllocator.h
         Marker.c
@@ -35,7 +34,7 @@ add_library(immix-isolates
         State.c
         State.h
         Stats.c
-        Stats.h ImmixGC.h)
+        Stats.h)
 
 target_include_directories(immix-isolates
         PRIVATE ../immix_commix)
