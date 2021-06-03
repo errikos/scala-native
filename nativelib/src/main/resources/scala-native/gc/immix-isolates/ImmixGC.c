@@ -12,6 +12,17 @@ void scalanative_afterexit() {
     Stats_OnExit(get_state()->heap.stats);
 }
 
+/* This function is called once per thread. */
+NOINLINE void scalanative_thread_init() {
+    btree_insert(&state_index, pthread_self(), next_avail_state_idx++);
+
+    Heap_Init(&get_state()->heap, Settings_MinHeapSize(), Settings_MaxHeapSize());
+    Stack_Init(&get_state()->stack, INITIAL_STACK_SIZE);
+
+    atexit(scalanative_afterexit);
+}
+
+/* This function is called exactly once, by the generated "main" function. */
 NOINLINE void scalanative_init() {
     /* zero-out isolate GC states array */
     memset(isolate_states, 0, MAXNUM_ISOLATES * sizeof(GC_state_t));
@@ -19,11 +30,8 @@ NOINLINE void scalanative_init() {
     /* initialise GC state index */
     btree_init(&state_index);
 
-    btree_insert(&state_index, pthread_self(), next_avail_state_idx++);
-
-    Heap_Init(&get_state()->heap, Settings_MinHeapSize(), Settings_MaxHeapSize());
-    Stack_Init(&get_state()->stack, INITIAL_STACK_SIZE);
-    atexit(scalanative_afterexit);
+    /* initialise the GC for the main thread */
+    scalanative_thread_init();
 }
 
 INLINE void *scalanative_alloc(void *info, size_t size) {
