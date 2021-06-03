@@ -2,7 +2,7 @@
 #include "BinaryTree.h"
 
 typedef struct {
-    pthread_t pid;
+    pthread_t tid;
     size_t pos;
 } data_t;
 
@@ -19,17 +19,20 @@ void btree_init(btree_t *btree) {
     btree->size = 0u;
 }
 
-void btree_insert(btree_t *btree, pthread_t pid, size_t pos) {
+void btree_insert(btree_t *btree, pthread_t tid, size_t pos) {
     btree_node_t **it = &btree->root;
 
     while (*it) {
-        it = (pid < (*it)->data.pid) ? &(*it)->left : &(*it)->right;
+        it = (tid < (*it)->data.tid) ? &(*it)->left : &(*it)->right;
     }
 
     *it = malloc(sizeof(btree_node_t));
-    (*it)->left = NULL;
-    (*it)->right = NULL;
-    (*it)->data = (data_t){.pid = pid, .pos = pos};
+
+    **it = (btree_node_t) {
+        .left = NULL,
+        .right = NULL,
+        .data = (data_t) { .tid = tid, .pos = pos }
+    };
 
     ++btree->size;
 }
@@ -50,12 +53,28 @@ int btree_search(const btree_t *btree, pthread_t key, size_t *value) {
     btree_node_t *p = btree->root;
 
     while (p) {
-        if (key == p->data.pid) {
+        if (key == p->data.tid) {
             *value = p->data.pos;
             return 0;
         }
-        p = (key < p->data.pid) ? p->left : p->right;
+        p = (key < p->data.tid) ? p->left : p->right;
     }
 
     return 1;
+}
+
+static void btree_destroy_rec(btree_node_t *node) {
+    if (node) {
+        btree_destroy_rec(node->left);
+        btree_destroy_rec(node->right);
+    }
+
+    free(node);
+}
+
+void btree_destroy(btree_t *btree) {
+    btree_destroy_rec(btree->root);
+
+    btree->root = NULL;
+    btree->size = 0;
 }

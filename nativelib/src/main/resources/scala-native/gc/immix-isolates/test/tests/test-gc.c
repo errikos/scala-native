@@ -1,24 +1,32 @@
-#include <unistd.h>
 #include <pthread.h>
 #include "State.h"
 #include "munit.h"
 
-MunitResult gc_initial_state_test(const MunitParameter params[],
-                                  void *user_data_or_fixture) {
-    munit_assert_size(next_avail_state_idx, ==, 0);
-    return MUNIT_OK;
-}
-
-MunitResult gc_init_state_test(const MunitParameter params[],
-                                  void *user_data_or_fixture) {
+void *gc_state_setup(const MunitParameter params[], void *user_data) {
     /* zero-out isolate GC states array */
     memset(isolate_states, 0, MAXNUM_ISOLATES * sizeof(GC_state_t));
 
     /* initialise GC state index */
     btree_init(&state_index);
 
-    munit_assert_size(next_avail_state_idx, ==, 0);
+    return NULL;
+}
 
+void gc_state_destroy(void *fixture) {
+    btree_destroy(&state_index);
+}
+
+MunitResult gc_initial_state_test(const MunitParameter params[],
+                                  void *user_data_or_fixture) {
+    munit_assert_size(next_avail_state_idx, ==, 0);
+    for (size_t i = 0; i != MAXNUM_ISOLATES * sizeof(GC_state_t); ++i)
+        munit_assert_char(((char*)isolate_states)[i], ==, 0);
+
+    return MUNIT_OK;
+}
+
+MunitResult gc_init_state_test(const MunitParameter params[],
+                                  void *user_data_or_fixture) {
     /* create a GC state for the current PID and add to index */
     btree_insert(&state_index, pthread_self(), next_avail_state_idx++);
 
@@ -38,16 +46,16 @@ static MunitTest gcTests[] = {
     {
         "/gc-initial-state-test",             /* name */
         gc_initial_state_test,  /* test */
-        NULL,                   /* setup */
-        NULL,                   /* tear_down */
+        gc_state_setup,                   /* setup */
+        gc_state_destroy,                   /* tear_down */
         MUNIT_TEST_OPTION_NONE, /* options */
         NULL                    /* parameters */
     },
     {
         "/gc-init-state-test",             /* name */
         gc_init_state_test,  /* test */
-        NULL,                   /* setup */
-        NULL,                   /* tear_down */
+        gc_state_setup,                   /* setup */
+        gc_state_destroy,                   /* tear_down */
         MUNIT_TEST_OPTION_NONE, /* options */
         NULL                    /* parameters */
     },
