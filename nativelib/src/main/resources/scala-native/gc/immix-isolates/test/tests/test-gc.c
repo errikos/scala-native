@@ -1,5 +1,5 @@
 #include <pthread.h>
-#include "State.h"
+#include "GCState.h"
 #include "munit.h"
 
 #ifdef REACTIVE_ISOLATES

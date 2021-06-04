@@ -31,13 +31,14 @@ add_library(immix-isolates
         Object.h
         Settings.c
         Settings.h
-        State.c
-        State.h
+        GCState.c
+        GCState.h
         Stats.c
         Stats.h)
 
 target_include_directories(immix-isolates
-        PRIVATE ../immix_commix)
+        PRIVATE ../immix_commix
+        PRIVATE ../../isolates)
 
 add_executable(immix-isolates-test
         test/munit/munit.c

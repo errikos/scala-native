@@ -20,10 +20,6 @@ extern BlockAllocator blockAllocator;
 
 #else
 
-#ifndef MAXNUM_ISOLATES
-#define MAXNUM_ISOLATES 64
-#endif
-
 typedef struct {
     Heap heap;
     Stack stack;
@@ -35,15 +31,16 @@ typedef struct {
 extern GC_state_t isolate_states[];
 extern btree_t state_index;
 
-extern size_t next_avail_state_idx;
+void GC_init_state();
+void GC_new_instance(pthread_t tid);
 
-GC_state_t *get_state();
+GC_state_t *GC_get_state();
 
-#define HEAP() (get_state()->heap)
-#define STACK() (get_state()->stack)
-#define ALLOCATOR() (get_state()->allocator)
-#define LARGE_ALLOCATOR() (get_state()->largeAllocator)
-#define BLOCK_ALLOCATOR() (get_state()->blockAllocator)
+#define HEAP() (GC_get_state()->heap)
+#define STACK() (GC_get_state()->stack)
+#define ALLOCATOR() (GC_get_state()->allocator)
+#define LARGE_ALLOCATOR() (GC_get_state()->largeAllocator)
+#define BLOCK_ALLOCATOR() (GC_get_state()->blockAllocator)
 
 #endif
 

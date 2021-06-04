@@ -5,7 +5,7 @@
 #include "Log.h"
 #include "Allocator.h"
 #include "Marker.h"
-#include "State.h"
+#include "GCState.h"
 #include "utils/MathUtils.h"
 #include "StackTrace.h"
 #include "Settings.h"

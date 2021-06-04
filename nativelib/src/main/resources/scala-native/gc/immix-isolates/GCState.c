@@ -1,6 +1,6 @@
 #include <assert.h>
 #include <pthread.h>
-#include "State.h"
+#include "GCState.h"
 
 #ifndef REACTIVE_ISOLATES
 
@@ -12,12 +12,22 @@ BlockAllocator blockAllocator;
 
 #else
 
+#include "IsolateLayer.h"
+
 GC_state_t isolate_states[MAXNUM_ISOLATES];
 btree_t state_index;
 
-size_t next_avail_state_idx = 0;
+static size_t next_avail_state_idx = 0;
 
-GC_state_t *get_state() {
+void GC_init_state() {
+    btree_init(&state_index);
+}
+
+void GC_new_instance(pthread_t tid) {
+    btree_insert(&state_index, pthread_self(), next_avail_state_idx++);
+}
+
+GC_state_t *GC_get_state() {
     size_t pos = -1;
     int retval = btree_search(&state_index, pthread_self(), &pos);
     assert(retval == 0);

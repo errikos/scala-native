@@ -3,7 +3,7 @@
 #include "Marker.h"
 #include "Object.h"
 #include "Log.h"
-#include "State.h"
+#include "GCState.h"
 #include "datastructures/Stack.h"
 #include "headers/ObjectHeader.h"
 #include "Block.h"
