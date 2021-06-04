@@ -30,7 +30,7 @@ object GC {
   private[scalanative] final case object Immix
       extends GC("immix", Seq(), Seq("shared", "immix_commix"))
   private[scalanative] final case object ImmixIsolates
-    extends GC("immix-isolates", Seq(), Seq("shared", "immix_commix"))
+    extends GC("immix-isolates", Seq(), Seq("shared", "immix_commix", "../isolates"))
   private[scalanative] final case object Commix
       extends GC("commix", Seq(), Seq("shared", "immix_commix"))
   private[scalanative] final case object Experimental
