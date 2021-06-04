@@ -30,7 +30,8 @@ NOINLINE void scalanative_thread_init() {
     Heap_Init(&HEAP(), Settings_MinHeapSize(), Settings_MaxHeapSize());
     Stack_Init(&STACK(), INITIAL_STACK_SIZE);
 
-//    atexit(scalanative_afterexit);
+    // temporarily disabled
+    // atexit(scalanative_afterexit);
 }
 
 /* This function is called exactly once, by the generated "main" function. */
